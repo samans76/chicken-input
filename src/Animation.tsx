@@ -13,9 +13,25 @@ type AnimationProps = {
 
 let interval: number;
 
-export function Sprite({ width, height, image, animations, duration, playAnimation }: AnimationProps) {
+export function Sprite({
+  width,
+  height,
+  image,
+  animations,
+  duration,
+  playAnimation,
+}: AnimationProps) {
   const [currentImage, setCurrentImage] = useState<string>(image);
-  const [currentAnimation, setCurrentAnimation] = useState<string | null>(playAnimation);
+  const [currentAnimation, setCurrentAnimation] = useState<string | null>(
+    playAnimation
+  );
+
+  console.log("animation in sprite : ", currentAnimation);
+  console.log("currentImage in sprite : ", currentImage);
+
+  useEffect(() => {
+    setCurrentAnimation(playAnimation);
+  }, [playAnimation]);
 
   useEffect(() => {
     clearInterval(interval);
@@ -24,10 +40,15 @@ export function Sprite({ width, height, image, animations, duration, playAnimati
       // run a function that changes current image base on frames in an interval until it reaches the end then => to main image
       const intervalTime = duration / animation.frames.length;
       interval = setInterval(() => {
-        console.log("interval ran !");
+        // console.log("interval ran !");
         setCurrentImage((curr) => {
           const frameIndex = animation.frames.findIndex((i) => i === curr);
-          console.log(" info:", curr.toString(), animation, curr === "/eat.png");
+          // console.log(
+          //   " info:",
+          //   curr.toString(),
+          //   animation,
+          //   curr === "/eat.png"
+          // );
           console.log("frameIndex :", frameIndex);
           const notInFrames = frameIndex < 0;
           if (notInFrames) {
@@ -61,8 +82,6 @@ export function Sprite({ width, height, image, animations, duration, playAnimati
   }, [frames]);
 
   return (
-    <>
-      <img src={image} width={width} height={height} />
-    </>
+    <img key={currentImage} src={currentImage} width={width} height={height} />
   );
 }
