@@ -1,10 +1,32 @@
 import { useEffect, useRef, useState } from "react";
+import { Animation, Sprite } from "./Animation";
+import MovingElement from "./MovingDiv";
 
 function ChickenInput() {
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState("");
+  const [inputtingLetter, setInputtingLetter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const [animation, setAnimation] = useState<string[] | null>(null);
+
+  const image = "/main.png";
+  const animations: Animation[] = [
+    { name: "put-down", frames: ["/eat.png"] },
+    { name: "pick-up", frames: ["/eat.png", "/main.png"] },
+  ];
+
+  const handleAnimation = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    console.log("e: ", e.key);
+    if (e.key === "Backspace" || e.key === "Delete") {
+      setAnimation(["pick-up"]);
+      return;
+    } else if (!notLetterKeys.includes(e.key)) {
+      setInputtingLetter(e.key);
+      setAnimation(["put-down"]);
+    }
+  };
 
   const getTextWidth = (text: string, font: string): number => {
     const canvas = canvasRef.current;
@@ -56,18 +78,67 @@ function ChickenInput() {
         onChange={handleInputChange}
         onKeyUp={handleCursorPositionChange}
         onClick={handleCursorPositionChange}
-        // placeholder="Enter text"
+        onKeyDown={handleAnimation}
       />
       <p>Cursor position: {cursorPosition !== null ? `${cursorPosition}px` : "Not focused"}</p>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-      <img
-        style={{ right: cursorPosition ?? 0 }}
-        src={"chicken.png"}
-        alt="Top Right Icon"
-        className=" h-10 w-10 absolute top-[-40px] mt-1 mr-1"
+      <Sprite
+        width={55}
+        height={55}
+        image={image}
+        animations={animations}
+        duration={500}
+        playAnimation={animation}
+        style={{
+          position: "absolute",
+          right: cursorPosition ? cursorPosition - 10 : -5,
+          top: -40,
+          transform: "scaleX(-1)",
+        }}
       />
+      <MovingElement
+        children={[<span>{inputtingLetter}</span>]}
+        duration={500}
+        horizontalMove={0}
+        verticalMove={200}
+      ></MovingElement>
+      <span className="word"></span>
     </div>
   );
 }
 
 export default ChickenInput;
+
+const notLetterKeys = [
+  "F1",
+  "F2",
+  "F3",
+  "F4",
+  "F5",
+  "F6",
+  "F7",
+  "F8",
+  "F9",
+  "F10",
+  "F11",
+  "F12",
+  "Alt",
+  "Control",
+  "Meta",
+  "Shift",
+  "CapsLock",
+  "Tab",
+  "ArrowLeft",
+  "ArrowDown",
+  "ArrowRight",
+  "ArrowUp",
+  "Enter",
+  "Insert",
+  "Home",
+  "PageUp",
+  "PageDown",
+  "NumLock",
+  "Escape",
+  "ScrollLock",
+  "Pause",
+];

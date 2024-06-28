@@ -8,62 +8,54 @@ type AnimationProps = {
   image: string;
   animations: Animation[];
   duration: number; // in ms
-  playAnimation: string | null;
+  playAnimation: string[] | null;
+  style?: React.CSSProperties;
 };
 
-let interval: number;
+let intervals: number[] = [];
 
-export function Sprite({
-  width,
-  height,
-  image,
-  animations,
-  duration,
-  playAnimation,
-}: AnimationProps) {
+export function Sprite({ width, height, image, animations, duration, playAnimation, style }: AnimationProps) {
   const [currentImage, setCurrentImage] = useState<string>(image);
-  const [currentAnimation, setCurrentAnimation] = useState<string | null>(
-    playAnimation
-  );
+  const [currentAnimation, setCurrentAnimation] = useState<string[] | null>(playAnimation);
 
-  console.log("animation in sprite : ", currentAnimation);
-  console.log("currentImage in sprite : ", currentImage);
+  // console.log("animation in sprite : ", currentAnimation);
+  // console.log("currentImage in sprite : ", currentImage);
 
   useEffect(() => {
+    setCurrentImage(image);
     setCurrentAnimation(playAnimation);
+    intervals.map((i) => clearInterval(i));
   }, [playAnimation]);
 
   useEffect(() => {
-    clearInterval(interval);
-    const animation = animations.find((i) => i.name === playAnimation);
+    if (!currentAnimation) return;
+    intervals.map((i) => clearInterval(i));
+    const firstAnimation = playAnimation?.find((i) => !!i);
+    const animation = animations.find((i) => i.name === firstAnimation);
+
     if (animation) {
-      // run a function that changes current image base on frames in an interval until it reaches the end then => to main image
-      const intervalTime = duration / animation.frames.length;
-      interval = setInterval(() => {
-        // console.log("interval ran !");
+      const playNextFrame = () => {
         setCurrentImage((curr) => {
           const frameIndex = animation.frames.findIndex((i) => i === curr);
-          // console.log(
-          //   " info:",
-          //   curr.toString(),
-          //   animation,
-          //   curr === "/eat.png"
-          // );
-          console.log("frameIndex :", frameIndex);
           const notInFrames = frameIndex < 0;
           if (notInFrames) {
             return animation.frames[0];
           }
           const isLastFrame = frameIndex + 1 > animation.frames.length - 1;
           if (isLastFrame) {
-            clearInterval(interval);
+            intervals.map((i) => clearInterval(i));
             setCurrentAnimation(null);
             return image;
           }
 
           return animation.frames[frameIndex + 1];
         });
-      }, intervalTime);
+      };
+
+      const intervalTime = duration / animation.frames.length;
+      playNextFrame();
+      const interval = setInterval(playNextFrame, intervalTime);
+      intervals.push(interval);
     } else {
       if (currentImage !== image) setCurrentImage(image);
     }
@@ -81,7 +73,5 @@ export function Sprite({
     });
   }, [frames]);
 
-  return (
-    <img key={currentImage} src={currentImage} width={width} height={height} />
-  );
+  return <img style={style} key={currentImage} src={currentImage} width={width} height={height} />;
 }
