@@ -96,13 +96,21 @@ function ChickenInput() {
           transform: "scaleX(-1)",
         }}
       />
-      <MovingElement
+      {/* <MovingElement
         children={[<span>{inputtingLetter}</span>]}
         duration={500}
         horizontalMove={0}
         verticalMove={200}
-      ></MovingElement>
+      ></MovingElement> */}
       <span className="word"></span>
+
+      <MovingElement
+        children={[<div className="w-[50px] h-[50px] bg-purple-500">{inputtingLetter}</div>]}
+        duration={1000}
+        horizontalMove={200}
+        verticalMove={200}
+        destroyAtEnd={true}
+      ></MovingElement>
     </div>
   );
 }
