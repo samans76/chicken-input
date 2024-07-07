@@ -41,6 +41,8 @@ function MovingElement({
     const passedDestination = lastDistanceToEnd.current < distanceToEnd;
     if (passedDestination) {
       intervals.forEach((i) => clearInterval(i));
+      // setOffsetX(0);
+      // setOffsetY(0);
       if (destroyAtEnd) {
         setOffsetX(-10000);
         setOffsetY(-10000);
@@ -50,10 +52,16 @@ function MovingElement({
   };
 
   useEffect(() => {
+    console.log("children useEffect");
     intervals.forEach((i) => clearInterval(i));
+    offsetRef.current = { x: 0, y: 0 };
+    lastDistanceToEnd.current = bigDistance;
+    setOffsetX(0);
+    setOffsetY(0);
 
     const intervalTime = 1000 / animationFPS;
     const interval = setInterval(() => {
+      console.log("offsets :", offsetRef.current.y);
       elementPassDestination();
 
       const intervalCounts = duration / intervalTime;

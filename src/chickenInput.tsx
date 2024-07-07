@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Animation, Sprite } from "./Animation";
 import MovingElement from "./MovingDiv";
+import { useDebounce } from "use-debounce";
 
 function ChickenInput() {
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
@@ -20,11 +21,15 @@ function ChickenInput() {
   const handleAnimation = (e: React.KeyboardEvent<HTMLInputElement>) => {
     console.log("e: ", e.key);
     if (e.key === "Backspace" || e.key === "Delete") {
+      setInputtingLetter(null);
       setAnimation(["pick-up"]);
       return;
-    } else if (!notLetterKeys.includes(e.key)) {
+    }
+    if (!notLetterKeys.includes(e.key)) {
       setInputtingLetter(e.key);
       setAnimation(["put-down"]);
+    } else {
+      setInputtingLetter(null);
     }
   };
 
@@ -42,7 +47,9 @@ function ChickenInput() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target;
+    console.log("input: ", event);
     setInputValue(input.value);
+
     updateCursorPosition(input);
   };
 
@@ -96,20 +103,18 @@ function ChickenInput() {
           transform: "scaleX(-1)",
         }}
       />
-      {/* <MovingElement
-        children={[<span>{inputtingLetter}</span>]}
-        duration={500}
-        horizontalMove={0}
-        verticalMove={200}
-      ></MovingElement> */}
-      <span className="word"></span>
 
       <MovingElement
-        children={[<div className="w-[50px] h-[50px] bg-purple-500">{inputtingLetter}</div>]}
-        duration={1000}
-        horizontalMove={200}
-        verticalMove={200}
+        children={[<div>{inputtingLetter}</div>]}
+        duration={50}
+        horizontalMove={0}
+        verticalMove={18}
         destroyAtEnd={true}
+        style={{
+          position: "absolute",
+          right: cursorPosition ? cursorPosition + 3 : 8,
+          top: -20,
+        }}
       ></MovingElement>
     </div>
   );
@@ -149,4 +154,5 @@ const notLetterKeys = [
   "Escape",
   "ScrollLock",
   "Pause",
+  " ",
 ];
