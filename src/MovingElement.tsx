@@ -61,7 +61,6 @@ function MovingElement({
 
     const intervalTime = 1000 / animationFPS;
     const interval = setInterval(() => {
-      console.log("offsets :", offsetRef.current.y);
       elementPassDestination();
 
       const intervalCounts = duration / intervalTime;
