@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animation, Sprite } from "./Animation";
-import MovingElement from "./MovingDiv";
-import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
+import MovingElement from "./MovingElement";
 
 function ChickenInput() {
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
@@ -12,22 +12,43 @@ function ChickenInput() {
 
   const [animation, setAnimation] = useState<string[] | null>(null);
 
+  const addValueToInputDebounced = useDebouncedCallback((value: string) => {
+    setInputValue((curr) => curr + value);
+    if (inputRef.current) updateCursorPosition(inputRef.current);
+  }, 200);
+  const deleteInputCharDebounced = useDebouncedCallback(() => {
+    setInputValue((curr) => curr.slice(0, -1));
+    if (inputRef.current) updateCursorPosition(inputRef.current);
+  }, 200);
+
   const image = "/main.png";
   const animations: Animation[] = [
     { name: "put-down", frames: ["/eat.png"] },
     { name: "pick-up", frames: ["/eat.png", "/main.png"] },
   ];
 
-  const handleAnimation = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     console.log("e: ", e.key);
+    if (e.key === "ArrowLeft") {
+      //   e.currentTarget.selectionStart +1
+      updateCursorPosition(e.currentTarget);
+    }
+    if (e.key === "ArrowRight") {
+      //
+      updateCursorPosition(e.currentTarget);
+    }
     if (e.key === "Backspace" || e.key === "Delete") {
       setInputtingLetter(null);
       setAnimation(["pick-up"]);
+      deleteInputCharWithDelay();
       return;
     }
     if (!notLetterKeys.includes(e.key)) {
-      setInputtingLetter(e.key);
-      setAnimation(["put-down"]);
+      if (e.key !== " ") {
+        setInputtingLetter(e.key);
+        setAnimation(["put-down"]);
+      }
+      addValueToInputWithDelay(e.key);
     } else {
       setInputtingLetter(null);
     }
@@ -45,12 +66,19 @@ function ChickenInput() {
     return 0;
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const input = event.target;
-    console.log("input: ", event);
-    setInputValue(input.value);
+  const addValueToInputWithDelay = (value: string) => {
+    // you need cursor position to
+    if (addValueToInputDebounced.isPending()) {
+      addValueToInputDebounced.flush();
+    }
+    addValueToInputDebounced(value);
+  };
 
-    updateCursorPosition(input);
+  const deleteInputCharWithDelay = () => {
+    if (deleteInputCharDebounced.isPending()) {
+      deleteInputCharDebounced.flush();
+    }
+    deleteInputCharDebounced();
   };
 
   const handleCursorPositionChange = (
@@ -82,10 +110,10 @@ function ChickenInput() {
         value={inputValue}
         style={{ direction: "rtl" }}
         className="w-full h-full p-[10px] rounded-[10px] border border-slate-600"
-        onChange={handleInputChange}
+        // onChange={handleInputChange}
         onKeyUp={handleCursorPositionChange}
         onClick={handleCursorPositionChange}
-        onKeyDown={handleAnimation}
+        onKeyDown={handleKeyDown}
       />
       <p>Cursor position: {cursorPosition !== null ? `${cursorPosition}px` : "Not focused"}</p>
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
@@ -154,5 +182,4 @@ const notLetterKeys = [
   "Escape",
   "ScrollLock",
   "Pause",
-  " ",
 ];

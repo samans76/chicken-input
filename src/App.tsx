@@ -1,4 +1,4 @@
-import ChickenInput from "./ChickenInput";
+import ChickenInput from "./chickenInput";
 
 function App() {
   return (
