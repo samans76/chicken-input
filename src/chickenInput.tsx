@@ -125,12 +125,12 @@ function ChickenInput() {
         children={[<div>{inputtingLetter}</div>]}
         duration={putDownDuration}
         horizontalMove={0}
-        verticalMove={25}
+        verticalMove={19}
         destroyAtEnd={true}
         style={{
           position: "absolute",
           right: cursorPosition ? cursorPosition + 19 : 8, // @todo better be size of text
-          top: -20,
+          top: -12,
         }}
       />
     ),
@@ -175,11 +175,11 @@ function ChickenInput() {
         type="text"
         value={inputValue}
         style={{ direction: "rtl" }}
-        className="w-full h-full p-[10px] rounded-[10px] border border-slate-600"
+        className="w-full h-full p-[10px] rounded-[10px] border border-[#D6A16C] outline-[#9A4B3C]"
         onClick={handleCursorPositionChange}
         onKeyDown={handleKeyDown}
       />
-      <p>Cursor position: {cursorPosition !== null ? `${cursorPosition}px` : "Not focused"}</p>
+      {/* <p>Cursor position: {cursorPosition !== null ? `${cursorPosition}px` : "Not focused"}</p> */}
       <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
       {status === "normal" && (
         <Sprite
